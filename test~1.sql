@@ -126,6 +126,108 @@ end;
 
 select * from tab;
 
+-- Create a table - 2 to 3 Columns  , primary _key - Emp_id , unqiue Key - Email _id-- Assignement--, null - ''
+
+--implicity cursor, expilicty cursor--
+
+
+select * from employee;
+
+SET SERVEROUTPUT ON;
+
+Declare
+V_salary number;
+Begin
+select salary into V_salary from employee where emp_ID =102;
+dbms_output.put_line(V_salary);
+END;
+
+--Explicity Cursor--
+declare
+cursor emp_cursor is
+select emp_id,emp_name,salary from employee;
+V_emp_id employee.emp_id%type;
+V_emp_name employee.emp_name%type;
+V_salary employee.salary%type;
+begin
+open emp_cursor;
+loop
+fetch emp_cursor
+into
+V_emp_id, V_emp_name, V_salary;
+exit when emp_cursor%notfound;
+Dbms_output.put_line(V_emp_id ||' '|| V_emp_name || ' '|| V_salary);
+end loop;
+close emp_cursor;
+end;
+
+select * from Dept;
+
+declare
+Cursor dep_cursor is
+select dept_id,Dept_name from dept;
+V_dept_id dept.dept_id%type;
+V_dept_name dept.Dept_name%type;
+begin
+open Dep_cursor;
+loop
+fetch dep_cursor
+into
+V_dept_id,V_Dept_name;
+exit when dep_cursor%notfound;
+DbMS_output.put_line(V_dept_id ||' '|| V_Dept_name);
+end loop;
+close dep_cursor;
+end;
+
+--implicity cursor --
+begin
+update employee set salary = salary +1000 where dept_id=10;
+dbms_output.put_line('row updated by shalini ' || sql%rowcount);
+end;
+
+declare
+cursor emp1_cursor (V_dept_id number) is
+select emp_id,emp_name,Salary from employee
+where dept_id =V_dept_id;
+begin
+for
+emp_rec in emp1_cursor(20)
+loop
+dbms_output.put_line(emp_rec.emp_name || ' ' || emp_rec.salary);
+end loop;
+end;
+
+declare
+cursor emp_cursor is
+select emp_id,salary from employee;
+type emp_type is table of
+emp_cursor%rowtype;
+V_emp_data emp_type;
+begin
+open emp_cursor;
+loop
+fetch emp_cursor
+bulk collect into V_emp_data
+limit 100;
+exit when V_emp_data.count=0;
+forall i in 1.. V_emp_data.count
+update employee set salary = 
+V_emp_data (i).salary+500
+where emp_id =V_emp_data(i).emp_id;
+end loop;
+close emp_cursor;
+end;
+
+
+
+
+
+
+
+select * from Employee;
+
+
 
 
 
