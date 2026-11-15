@@ -126,7 +126,9 @@ end;
 
 select * from tab;
 
--- Create a table - 2 to 3 Columns  , primary _key - Emp_id , unqiue Key - Email _id-- Assignement--, null - ''
+
+
+
 
 --implicity cursor, expilicty cursor--
 
@@ -227,6 +229,131 @@ end;
 
 select * from Employee;
 
+
+-- Create a table - 2 to 3 Columns  , primary _key - Emp_id , unqiue Key - Email _id-- Assignement--, null - ''
+
+
+CREATE TABLE Employee1 (
+    Emp_id INT PRIMARY KEY,
+    Email_id VARCHAR(100) UNIQUE);
+    
+INSERT INTO Employee1 (Emp_id, Email_id) VALUES(101, 'john@gmail.com');
+INSERT INTO Employee1 (Emp_id, Email_id) VALUES(102, 'smith@gmail.com');
+INSERT INTO Employee1 (Emp_id, Email_id) VALUES(103, 'alex@gmail.com');
+
+select * from employee;
+
+
+set serveroutput on
+
+begin
+insert into employee1 values(104, 'john1@gmail.com');
+dbms_output.put_line('record inserted successfully');
+exception 
+when dup_val_on_index then
+dbms_output.put_line('error duplicate found' );
+when others then 
+dbms_output.put_line('errors'||sqlerrm);
+end;
+
+
+--handling null values --
+declare
+e_null_value exception;
+pragma exception_init(e_null_value, -1400);
+begin
+insert into employee1(emp_id, Email_id) values (null,'dhana@gmail.com');
+dbms_output.put_line('record inserted successfully');
+exception
+when dup_val_on_index then
+dbms_output.put_line('error duplicate found' );
+when others then 
+dbms_output.put_line('errors '||sqlerrm);
+end;
+
+--ref cursor--
+declare
+type emp_ref_cursor is ref cursor;
+V_cursor emp_ref_cursor;
+V_emp_id employee.emp_id%type;
+V_name employee.emp_name%type;
+V_salary employee.salary%type;
+begin
+open V_cursor 
+for
+select emp_id, emp_name, salary from employee;
+loop
+fetch V_cursor into v_emp_id, V_name, V_salary;
+exit when V_cursor%notfound;
+dbms_output.put_line(V_emp_id||'  '||V_name || '  '|| V_salary);
+end loop;
+close V_cursor;
+end;
+
+-- Assignment -- Declare -- V_ , add Cursor,, select * data insert --
+declare
+cursor emp_cursor is
+select emp_id,salary from employee;
+type emp_type is table of
+emp_cursor%rowtype;
+V_emp_data emp_type;
+begin
+open emp_cursor;
+loop
+fetch emp_cursor
+bulk collect into V_emp_data
+limit 100;
+exit when V_emp_data.count=0;
+forall i in 1.. V_emp_data.count
+update employee set salary = 
+V_emp_data (i).salary*2.75
+where emp_id =V_emp_data(i).emp_id;
+end loop;
+close emp_cursor;
+end;
+
+
+--cursor with limit optimisation--
+declare
+cursor C_emp is 
+select emp_id, emp_name ,salary, dept_id from employee;
+type emp_type is table of C_emp%rowtype;
+V_emp_id emp_type;
+begin
+open C_emp;
+loop
+fetch C_emp bulk collect into V_emp_id limit 100;
+exit when V_emp_id.count=0;
+for i in 1.. V_emp_id.count
+loop
+dbms_output.put_line(V_emp_id(i).emp_id||'  '||V_emp_id(i).emp_name||'  '||V_emp_id(i).salary||'  '||V_emp_id(i).dept_id);
+end loop; 
+end loop;
+close C_emp;
+end;
+
+
+Declare
+cursor C_emp is 
+select emp_id, emp_name , salary from employee;
+begin
+for emp in C_emp
+loop
+begin
+if emp.salary is null then
+raise_application_error(-1500, ' salary is null' || emp.emp_id);
+end if;
+dbms_output.put_line(emp.emp_name ||'  '|| emp.salary);
+exception
+when others then 
+dbms_output.put_line('Error ' || sqlerrm);
+end;
+end loop;
+end;
+
+insert into employee values(108,'Suddu', null, 20);
+
+commit;
 
 
 
