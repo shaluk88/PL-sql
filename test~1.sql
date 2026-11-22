@@ -355,6 +355,131 @@ insert into employee values(108,'Suddu', null, 20);
 
 commit;
 
+--Procedure-- in parameter
+set serveroutput on;
+create or replace procedure get_employees (
+V_emp_id in number) is
+V_name employee.emp_name%type;
+V_salary employee.salary%type;
+begin
+select emp_name, salary into V_name, V_salary from employee
+where emp_id =V_emp_id;
+dbms_output.put_line('Name: ' || V_name ||'  '||'salary: '|| V_salary);
+exception
+when no_data_found then 
+dbms_output.put_line('employee not found');
+when others then 
+dbms_output.put_line(sqlerrm);
+end;
 
+exec get_employees(109);
 
+-- out parameter--
+create or replace procedure get_salary(
+V_emp_id IN number,
+V_salary OUT number) 
+IS
+BEGIN
+select salary into V_salary from employee
+where emp_id=V_emp_id;
+exception
+when no_data_found then
+V_salary := NULL;
+end;
+
+exec get_salary(101);
+
+declare 
+V_salary number;
+begin
+get_salary(101,V_salary);
+dbms_output.put_line('Employee Salary: '|| V_salary);
+end; 
+
+--inout parameter--
+
+create or replace procedure Calculate_salary(
+P_salary IN OUT number,
+P_percent IN number) IS 
+begin
+P_salary := P_salary + (P_salary + P_percent/100);
+end;
+
+declare
+V_salary number := 50000;
+begin
+calculate_salary(V_salary ,0.5);
+dbms_output.put_line('new salary: ' ||V_salary);
+end;
+
+-- 
+//** Difference Between IN, OUT and IN OUT
+--Feature IN OUT IN OUT
+--Pass value Yes No Yes
+--Return value No Yes Yes
+--Read inside procedure Yes After assignment Yes
+--Modify parameter No Yes Yes
+--Default mode Yes No No**//
+--
+
+create or replace procedure add_employee (
+P_emp_id IN number, P_name IN varchar2, p_salary IN number,P_dept_id IN number,
+P_status OUT varchar2) is
+begin
+insert into employee ( emp_id, emp_name, salary, dept_id) values(
+P_emp_id, P_name, P_salary,P_dept_id);
+p_status:= 'employee inserted successfully';
+exception
+when dup_val_on_index then
+P_status:= 'employee id already existed';
+when others then 
+dbms_output.put_line(sqlerrm);
+end;
+
+declare
+V_status varchar2 (200);
+begin
+add_employee (109, 'anil', 25000, 70, V_status);
+dbms_output.put_line(V_status);
+end;
+
+select * from employee1
+
+delete employee where emp_id=109
+
+create table emp ( 
+id number (10) primary key,
+name varchar2 (50),
+salary number(10,2),
+email varchar2(100) unique,
+dept_id number (5)
+);
+
+insert into emp values (101, 'john', 25000, '1john@gmail.com', 10);
+insert into emp values (102, 'Shalini', 22000, 'shalini@gmail.com', 20);
+insert into emp values (103, 'suddu', 23000, 'suddu@gmail.com', 30);
+
+commit; 
+select * from emp;
+
+create or replace procedure add_emp1 (
+P_emp_id IN number, P_name IN varchar2, p_salary IN number,P_email IN varchar2, P_dept_id IN number,
+P_status OUT varchar2) is
+begin
+insert into emp (id, name, salary, email, dept_id) values(
+P_emp_id, P_name, P_salary,P_email,P_dept_id);
+p_status:= 'employee inserted successfully';
+exception
+when dup_val_on_index then
+P_status:= 'employee id already existed';
+when others then 
+dbms_output.put_line(sqlerrm);
+end;
+
+declare
+V_status varchar2 (200);
+begin
+add_emp1 (109, 'anil', 25000, 'anil@gmail.com', 70, V_status);
+dbms_output.put_line(V_status);
+end;
 
