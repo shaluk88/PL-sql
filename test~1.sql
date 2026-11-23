@@ -483,3 +483,137 @@ add_emp1 (109, 'anil', 25000, 'anil@gmail.com', 70, V_status);
 dbms_output.put_line(V_status);
 end;
 
+Select * from emp;
+update emp set salary = 50000 where id =101;
+update emp set salary = 70000 where id =102;
+update emp set salary = 80000 where id =103;
+update emp set salary = 120000 where id =109;
+
+Commit;
+
+create or replace procedure salary_incr(
+P_id IN number) IS 
+V_salary number;
+V_incr number;
+V_new_salary number;
+begin
+select salary into V_salary from emp where Id = P_id;
+if V_salary <50000 then 
+V_incr:= 20;
+elsif 
+V_salary <=100000 then
+V_incr:= 10;
+else
+V_incr:= 5;
+end if;
+V_new_salary := V_salary +(V_salary*V_incr/100);
+update emp set salary = V_new_salary where ID = P_id;
+dbms_output.Put_line('Old Salary: '|| V_salary );
+dbms_output.put_line('Increment : '|| V_incr ||'%');
+dbms_output.put_line('New Salary : '|| V_new_salary );
+exception
+when no_data_found then 
+dbms_output.put_line('Employee Not Found');
+when others then
+dbms_output.put_line(sqlerrm);
+end;
+
+set serveroutput on
+exec salary_incr (101);
+//**
+create or replace procedure high_sal_emp 
+(
+    p_emp_id IN NUMBER
+)
+IS cursor C_emp IS select id, name, salary from emp where salary >50000  AND id = p_emp_id;
+V_emp_id emp.id%TYPE;
+V_name   emp.name%TYPE;
+V_salary emp.salary%TYPE;
+V_count number :=0;
+begin
+open C_emp;
+loop
+fetch
+C_emp INTO V_emp_id, V_name, V_salary;
+exit when C_emp%notfound;
+V_count:=V_count+1;
+dbms_output.put_line( V_emp_id || '  '|| V_name ||'  ' || V_salary);
+end loop;
+close C_emp;
+dbms_output.put_line('Total Employees' || V_count);
+exception
+when no_data_found then 
+dbms_output.put_line('Employee Not Found');
+when others then
+dbms_output.put_line(sqlerrm);
+end;
+**//
+begin
+ high_sal_emp(102);
+end;
+--
+CREATE OR REPLACE PROCEDURE high_sal_emp
+(
+    p_emp_id IN NUMBER
+)
+IS
+    CURSOR C_emp IS
+        SELECT id, name, salary
+        FROM emp
+        WHERE salary > 50000
+        AND id = p_emp_id;
+
+    V_emp_id emp.id%TYPE;
+    V_name   emp.name%TYPE;
+    V_salary emp.salary%TYPE;
+
+    V_count NUMBER := 0;
+
+BEGIN
+    OPEN C_emp;
+
+    LOOP
+        FETCH C_emp
+        INTO V_emp_id, V_name, V_salary;
+
+        EXIT WHEN C_emp%NOTFOUND;
+
+        V_count := V_count + 1;
+
+        DBMS_OUTPUT.PUT_LINE(
+            V_emp_id || ' ' ||
+            V_name || ' ' ||
+            V_salary
+        );
+
+    END LOOP;
+
+    CLOSE C_emp;
+
+    IF V_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Employee Not Found');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE(
+            'Total Employees: ' || V_count
+        );
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        IF C_emp%ISOPEN THEN
+            CLOSE C_emp;
+        END IF;
+
+        DBMS_OUTPUT.PUT_LINE(SQLERRM);
+        RAISE;
+
+END;
+/
+---
+
+implicity --
+select * from emp where salary > -- top 10--
+
+
+--procedure create replace, employee find out salary dept id 20 , Update table first for 20 dept id -- 
+
